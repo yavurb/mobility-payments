@@ -15,6 +15,7 @@ paths:
   /auth/signup:
     post:
       deprecated: false
+      security: []
       tags:
         - auth
       description: Craate an account based on the user type
@@ -35,9 +36,11 @@ paths:
                 name:
                   type: string
                 email:
+                  format: email
                   type: string
                 password:
                   type: string
+                  format: password
               examples:
                 - name: Roy
                   email: roy@testmail.com
@@ -55,6 +58,7 @@ paths:
   /auth/signin:
     post:
       deprecated: false
+      security: []
       tags:
         - auth
       description: Signin with a user credentials
@@ -69,8 +73,10 @@ paths:
               properties:
                 email:
                   type: string
+                  format: email
                 password:
                   type: string
+                  format: password
               examples:
                 - email: roy@testmail.com
                   password: MySecur3P44$w*rd
@@ -85,6 +91,11 @@ paths:
           $ref: "#/components/responses/InternalServerError"
 
 components:
+  securitySchemes:
+    JWTScheme:
+      type: apiKey
+      in: header
+      name: MobilityPayments-Api-Key
   responses:
     AuthPayload:
       description: The user credentials
@@ -137,3 +148,6 @@ components:
                 type: string
             examples:
               - message: Error creating resource
+
+security:
+  - JWTScheme: []
