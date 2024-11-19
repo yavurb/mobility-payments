@@ -12,7 +12,25 @@ servers:
 tags:
   - name: auth
   - name: payments
+  - name: system
 paths:
+  /health:
+    get:
+      deprecated: false
+      security: []
+      tags:
+        - system
+      description: Check if the service is up and running
+      operationId: healthCheck
+      responses:
+        200:
+          description: A system message indicating that the system is up and running
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: healthy!
+
   /auth/signup:
     post:
       deprecated: false
