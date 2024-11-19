@@ -1,0 +1,40 @@
+/// Configuration for the application.
+@go.Package { name = "github.com/yavurb/mobility-payments/config/app_config" }
+module Config
+
+import "package://pkg.pkl-lang.org/pkl-go/pkl.golang@0.8.0#/go.pkl"
+
+/// CORS configuration for the application.
+class Cors {
+    allowOrigins: Listing<String>(length > 0)
+    allowMethods: Listing<String>(length > 0)
+}
+
+class HttpAuth {
+  JWTSecret: String
+}
+
+class DatabaseConfig {
+  URI: String
+  name: String
+}
+
+/// The level of logging for the application.
+///
+/// - "error": Log only error level messages
+/// - "warn": Log error and warning messages
+/// - "info": Log all messages
+/// - "debug": Log all messages and debug information
+typealias LogLevel = "error"|"warn"|"info"|"debug"
+
+typealias Environment = "development"|"production"
+
+appURL: String
+host: String
+port: UInt16(isBetween(8910, 8920))
+cors: Cors
+httpAuth: HttpAuth
+database: DatabaseConfig
+
+logLevel: LogLevel
+environment: Environment

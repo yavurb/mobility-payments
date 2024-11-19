@@ -29,7 +29,7 @@ db_dowgrade:
 	migrate -path migrations -database $(uri) down $(n)
 
 gen_config:
-	pkl-gen-go config/Config.pkl
+	pkl-gen-go config/ConfigSchema.pkl
 
 write_version:
 	@echo $(latest_tag) > cmd/mobility-payments/.version
