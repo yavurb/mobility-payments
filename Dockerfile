@@ -11,18 +11,18 @@ COPY cmd cmd/
 COPY internal internal/
 
 # RUN go test ./...
-RUN go build -o /app/mobility ./cmd/mobility/main.go
+RUN go build -o /app/mobility-payments ./cmd/mobility-payments/main.go
 
 FROM alpine:3.20
 
 WORKDIR /app
 
-RUN adduser -D mobility && chown -R mobility:mobility /app
-USER mobility
+RUN adduser -D mobility-payments && chown -R mobility-payments:mobility-payments /app
+USER mobility-payments
 
 # TODO: Copy configuration file
-COPY --from=build --chown=mobility:mobility --chmod=770 /app/mobility /app/
+COPY --from=build --chown=mobility-payments:mobility-payments --chmod=770 /app/mobility-payments /app/
 
 EXPOSE 8910
 
-ENTRYPOINT ["./mobility"]
+ENTRYPOINT ["./mobility-payments"]

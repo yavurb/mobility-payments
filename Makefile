@@ -1,6 +1,6 @@
 latest_tag := $(shell git describe --tags 2> /dev/null || git rev-parse --short HEAD)
 new_migration: name ?= $(shell uuidgen)
-db_%: uri ?= "postgres://postgres:postgres@localhost:5432/mobility?sslmode=disable"
+db_%: uri ?= "postgres://postgres:postgres@localhost:5432/mobility-payments?sslmode=disable"
 db_upgrade: n ?=
 db_dowgrade: n ?= 1
 
@@ -8,10 +8,10 @@ dev:
 	air -c .air.toml
 
 run:
-	go run cmd/mobility/main.go
+	go run cmd/mobility-payments/main.go
 
 build:
-	go build -o bin/mobility cmd/mobility/main.go
+	go build -o bin/mobility-payments cmd/mobility-payments/main.go
 
 docker_build: test write_version
 	docker build . -t goyurback:$(latest_tag)
@@ -32,4 +32,4 @@ gen_config:
 	pkl-gen-go config/Config.pkl
 
 write_version:
-	@echo $(latest_tag) > cmd/mobility/.version
+	@echo $(latest_tag) > cmd/mobility-payments/.version
