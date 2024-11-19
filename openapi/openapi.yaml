@@ -1,0 +1,139 @@
+openapi: 3.1.0
+info:
+  title: Mobility Payments Documentation
+  version: 0.1.0
+  description: |
+    Mobility Payments is one of Mobility's branches. This service is in charge of processing and handling payment events.
+servers:
+  - url: http://localhost:8910/v1
+    description: Development server
+  - url: http://mobility-payments.yurb.dev/v1
+    description: Production server
+tags:
+  - name: auth
+paths:
+  /auth/signup:
+    post:
+      deprecated: false
+      tags:
+        - auth
+      description: Craate an account based on the user type
+      operationId: signup
+      requestBody:
+        description: Payload for creating a user
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                account_type:
+                  type: string
+                  enum:
+                    - merchant
+                    - customer
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+              examples:
+                - name: Roy
+                  email: roy@testmail.com
+                  password: MySecur3P44$w*rd
+                  account_type: merchant
+      responses:
+        201:
+          $ref: "#/components/responses/AuthPayload"
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        422:
+          $ref: "#/components/responses/UnprocessableEntity"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+  /auth/signin:
+    post:
+      deprecated: false
+      tags:
+        - auth
+      description: Signin with a user credentials
+      operationId: signin
+      requestBody:
+        description: Payload for logging in
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              examples:
+                - email: roy@testmail.com
+                  password: MySecur3P44$w*rd
+      responses:
+        200:
+          $ref: "#/components/responses/AuthPayload"
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        422:
+          $ref: "#/components/responses/UnprocessableEntity"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+components:
+  responses:
+    AuthPayload:
+      description: The user credentials
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                description: The public id for the created user
+                type: string
+              token:
+                type: string
+            examples:
+              - id: us_hon4j21
+                token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+
+    BadRequestError:
+      description: Returned when the request is malformed/don't comply with the contract
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+            examples:
+              - message: Missing parameter x
+
+    UnprocessableEntity:
+      description: Returned when the request cannot be fullfiled due to business/validation errors
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+            examples:
+              - message: Email already registered
+
+    InternalServerError:
+      description: Returned when an unexpected error occurs
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+            examples:
+              - message: Error creating resource
