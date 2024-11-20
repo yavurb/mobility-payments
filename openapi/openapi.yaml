@@ -307,6 +307,10 @@ components:
       properties:
         id:
           type: string
+        receiver_id:
+          type: string
+        sender_id:
+          type: string
         status:
           type: string
           enum:
@@ -335,6 +339,8 @@ components:
           format: date-time
       examples:
         - id: tr_uiosnh32819k
+          sender_id: us_uiosnh32819k
+          receiver_id: us_iosueoq3712
           status: requires_confirmation
           currency: USD
           amount: 1078
