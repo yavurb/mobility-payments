@@ -32,8 +32,8 @@ func TestSignIn(t *testing.T) {
 			},
 		}
 		passwordHasher := &mocks.PasswordHasherMock{
-			VerifyFn: func(password, hashedpassword string) bool {
-				return true
+			VerifyFn: func(password, hashedpassword string) (bool, error) {
+				return true, nil
 			},
 		}
 		tokenManager := &mocks.TokenManagerMock{

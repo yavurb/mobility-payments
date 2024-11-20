@@ -13,5 +13,5 @@ type TokenPayload struct {
 
 type TokenManager interface {
 	Generate(payload TokenPayload, duration time.Duration) (string, error)
-	Verify(token string) (TokenPayload, error)
+	Verify(token string) (*TokenPayload, error)
 }
