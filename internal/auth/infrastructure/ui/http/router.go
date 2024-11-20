@@ -78,6 +78,10 @@ func handleErr(err error) error {
 		return HTTPError{
 			Message: "User not found",
 		}.NotFound()
+	case domain.ErrUserAlreadyExists:
+		return HTTPError{
+			Message: "User already exists",
+		}.ErrUnprocessableEntity()
 	case domain.ErrInvalidCredentials:
 		return HTTPError{
 			Message: "Invalid credentials",

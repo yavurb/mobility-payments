@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/yavurb/mobility-payments/internal/auth/domain"
@@ -16,6 +17,10 @@ func (uc *authUsecase) SignUp(ctx context.Context, user_type userDomain.UserType
 
 	user, err := uc.userUsecase.Create(ctx, user_type, name, email, hashedPassword)
 	if err != nil {
+		if errors.Is(err, userDomain.ErrUserAlreadyExists) {
+			return "", "", domain.ErrUserAlreadyExists
+		}
+
 		return "", "", err
 	}
 
