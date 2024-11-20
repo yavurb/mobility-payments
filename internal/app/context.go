@@ -7,9 +7,17 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
+
 	appconfig "github.com/yavurb/mobility-payments/config/app_config"
 	"github.com/yavurb/mobility-payments/config/app_config/loglevel"
 	"github.com/yavurb/mobility-payments/internal/app/mods"
+
+	authApplication "github.com/yavurb/mobility-payments/internal/auth/application"
+	authAdapters "github.com/yavurb/mobility-payments/internal/auth/infrastructure/adapters"
+	authHTTPUI "github.com/yavurb/mobility-payments/internal/auth/infrastructure/ui/http"
+
+	userApplication "github.com/yavurb/mobility-payments/internal/users/application"
+	userRepositoryAdapter "github.com/yavurb/mobility-payments/internal/users/infrastructure/adapters/repository"
 )
 
 type App struct {
@@ -56,6 +64,15 @@ func (app *App) NewHttpContext() *echo.Echo {
 	e.Use(middleware.RequestID())
 
 	e.GET("/health", func(c echo.Context) error { return c.String(200, "Healthy!") })
+
+	userRepository := userRepositoryAdapter.NewUserRepository(app.connpool)
+	userUsecase := userApplication.NewUserUsecase(userRepository)
+	authUsecase := authApplication.NewAuthUsecase(
+		userUsecase,
+		authAdapters.NewAuthPasswordHasher(),
+		authAdapters.NewAuthTokenManager(app.config.HttpAuth.JWTSecret),
+	)
+	authHTTPUI.NewAuthRouter(e, authUsecase)
 
 	return e
 }
