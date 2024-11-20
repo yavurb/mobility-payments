@@ -1,12 +1,10 @@
 version: "2"
-cloud:
-  organization: ""
-  project: ""
-  hostname: ""
-servers: []
-sql: []
-overrides:
-  go: null
-plugins: []
-rules: []
-options: {}
+sql:
+  - engine: "postgresql"
+    queries: []
+    schema: "migrations/"
+    gen:
+      go:
+        package: "postgres"
+        out: "internal/common/storage/postgres"
+        sql_package: "pgx/v5"

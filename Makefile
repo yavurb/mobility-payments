@@ -28,6 +28,9 @@ db_upgrade:
 db_dowgrade:
 	migrate -path migrations -database $(uri) down $(n)
 
+db_drop:
+	migrate -path migrations -database $(uri) drop
+
 gen_config:
 	pkl-gen-go config/ConfigSchema.pkl
 
