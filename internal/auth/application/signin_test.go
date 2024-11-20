@@ -7,6 +7,7 @@ import (
 
 	"github.com/yavurb/mobility-payments/internal/auth/application/mocks"
 	"github.com/yavurb/mobility-payments/internal/auth/domain"
+	commonMocks "github.com/yavurb/mobility-payments/internal/common/mocks"
 	userDomain "github.com/yavurb/mobility-payments/internal/users/domain"
 )
 
@@ -17,7 +18,7 @@ const (
 
 func TestSignIn(t *testing.T) {
 	t.Run("it should sign up a user", func(t *testing.T) {
-		userUsecase := &mocks.UserUsecaseMock{
+		userUsecase := &commonMocks.UserUsecaseMock{
 			GetByEmailFn: func(ctx context.Context, email string) (*userDomain.User, error) {
 				return &userDomain.User{
 					ID:        1,

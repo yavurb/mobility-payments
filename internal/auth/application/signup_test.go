@@ -7,6 +7,7 @@ import (
 
 	"github.com/yavurb/mobility-payments/internal/auth/application/mocks"
 	"github.com/yavurb/mobility-payments/internal/auth/domain"
+	commonMocks "github.com/yavurb/mobility-payments/internal/common/mocks"
 	userDomain "github.com/yavurb/mobility-payments/internal/users/domain"
 )
 
@@ -15,7 +16,7 @@ func TestSignUp(t *testing.T) {
 		wantToken := "somejwttoken"
 		wantID := "us_omjnu4m8lsir"
 
-		userUsecase := &mocks.UserUsecaseMock{
+		userUsecase := &commonMocks.UserUsecaseMock{
 			CreateFn: func(ctx context.Context, user_type userDomain.UserType, name, email, password string) (*userDomain.User, error) {
 				return &userDomain.User{
 					ID:        1,
