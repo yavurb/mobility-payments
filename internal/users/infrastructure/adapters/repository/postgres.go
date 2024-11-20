@@ -74,3 +74,28 @@ func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*domain.
 		UpdatedAt: row.UpdatedAt.Time,
 	}, nil
 }
+
+func (r *UserRepository) GetByPublicID(ctx context.Context, id string) (*domain.User, error) {
+	row, err := r.db.GetByPublicID(ctx, id)
+	if err != nil {
+		log.Printf("Error getting User. Got: %v", err)
+
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, domain.ErrUserNotFound
+		}
+
+		return nil, err
+	}
+
+	return &domain.User{
+		ID:        row.ID,
+		PublicID:  row.PublicID,
+		Type:      domain.UserType(row.Type),
+		Name:      row.UserName,
+		Email:     row.Email,
+		Password:  row.Password,
+		Balance:   row.Balance,
+		CreatedAt: row.CreatedAt.Time,
+		UpdatedAt: row.UpdatedAt.Time,
+	}, nil
+}

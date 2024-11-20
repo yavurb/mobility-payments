@@ -7,8 +7,9 @@ import (
 )
 
 type RepositoryMock struct {
-	SaveFn       func(ctx context.Context, user *domain.UserCreate) (*domain.User, error)
-	GetByEmailFn func(ctx context.Context, email string) (*domain.User, error)
+	SaveFn          func(ctx context.Context, user *domain.UserCreate) (*domain.User, error)
+	GetByEmailFn    func(ctx context.Context, email string) (*domain.User, error)
+	GetByPublicIDFn func(ctx context.Context, id string) (*domain.User, error)
 }
 
 func (r *RepositoryMock) Save(ctx context.Context, user *domain.UserCreate) (*domain.User, error) {
@@ -17,4 +18,8 @@ func (r *RepositoryMock) Save(ctx context.Context, user *domain.UserCreate) (*do
 
 func (r *RepositoryMock) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
 	return r.GetByEmailFn(ctx, email)
+}
+
+func (r *RepositoryMock) GetByPublicID(ctx context.Context, id string) (*domain.User, error) {
+	return r.GetByPublicIDFn(ctx, id)
 }

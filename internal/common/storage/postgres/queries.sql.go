@@ -44,6 +44,39 @@ func (q *Queries) GetByEmail(ctx context.Context, email string) (GetByEmailRow, 
 	return i, err
 }
 
+const getByPublicID = `-- name: GetByPublicID :one
+select id, public_id, type, user_name, email, balance, password, created_at, updated_at from users where public_id = $1
+`
+
+type GetByPublicIDRow struct {
+	ID        int64
+	PublicID  string
+	Type      UserType
+	UserName  string
+	Email     string
+	Balance   int64
+	Password  string
+	CreatedAt pgtype.Timestamp
+	UpdatedAt pgtype.Timestamp
+}
+
+func (q *Queries) GetByPublicID(ctx context.Context, publicID string) (GetByPublicIDRow, error) {
+	row := q.db.QueryRow(ctx, getByPublicID, publicID)
+	var i GetByPublicIDRow
+	err := row.Scan(
+		&i.ID,
+		&i.PublicID,
+		&i.Type,
+		&i.UserName,
+		&i.Email,
+		&i.Balance,
+		&i.Password,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const save = `-- name: Save :one
 insert into users (public_id, type, user_name, email, password, balance) values ($1, $2, $3, $4, $5, $6) returning id, created_at, updated_at
 `
