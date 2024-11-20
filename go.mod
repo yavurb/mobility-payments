@@ -5,9 +5,11 @@ go 1.23.2
 require (
 	github.com/apple/pkl-go v0.8.1
 	github.com/go-playground/validator/v10 v10.23.0
+	github.com/google/go-cmp v0.6.0
 	github.com/jackc/pgx/v5 v5.7.1
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/labstack/gommon v0.4.2
+	github.com/matoous/go-nanoid/v2 v2.1.0
 )
 
 require (
