@@ -26,7 +26,7 @@ func (tm *authTokenManager) Generate(payload domain.TokenPayload, duration time.
 		"exp":  time.Now().UTC().Add(duration).Unix(),
 	})
 
-	signedToken, err := token.SignedString(tm.JWTSecret)
+	signedToken, err := token.SignedString([]byte(tm.JWTSecret))
 	if err != nil {
 		fmt.Printf("Error signing token: %v\n", err)
 		return "", err
