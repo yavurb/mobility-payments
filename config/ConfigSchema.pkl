@@ -29,7 +29,6 @@ typealias LogLevel = "error"|"warn"|"info"|"debug"
 
 typealias Environment = "development"|"production"
 
-appURL: String
 host: String
 port: UInt16(isBetween(8910, 8920))
 cors: Cors
