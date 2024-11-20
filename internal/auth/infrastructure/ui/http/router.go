@@ -69,7 +69,7 @@ func (r *authRouter) signin(c echo.Context) error {
 		return handleErr(err)
 	}
 
-	return c.JSON(http.StatusCreated, AuthPayload{Token: token, ID: id})
+	return c.JSON(http.StatusOK, AuthPayload{Token: token, ID: id})
 }
 
 func handleErr(err error) error {
