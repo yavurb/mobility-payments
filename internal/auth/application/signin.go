@@ -3,7 +3,6 @@ package application
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/yavurb/mobility-payments/internal/auth/domain"
@@ -14,10 +13,20 @@ func (uc *authUsecase) SignIn(ctx context.Context, email, password string) (stri
 	user, err := uc.userUsecase.GetByEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, userDomain.ErrUserNotFound) {
-			return "", "", fmt.Errorf("auth usecase: %w", domain.ErrUserNotFound)
+			return "", "", domain.ErrUserNotFound
 		}
 
 		return "", "", err
+	}
+
+	// TODO: Add a test case
+	validPassword, err := uc.passwordHasher.Verify(password, user.Password)
+	if err != nil {
+		return "", "", err
+	}
+
+	if !validPassword {
+		return "", "", domain.ErrInvalidCredentials
 	}
 
 	token, err := uc.tokenManager.Generate(
