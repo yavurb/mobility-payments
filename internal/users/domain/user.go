@@ -21,7 +21,8 @@ type User struct {
 	Password  string
 	PublicID  string
 
-	ID int64
+	Balance int64
+	ID      int64
 }
 
 type UserCreate struct {
@@ -30,6 +31,7 @@ type UserCreate struct {
 	Email    string
 	PublicID string
 	Password string
+	Balance  int64
 }
 
 func (u User) Equal(u2 User) bool {
@@ -46,4 +48,12 @@ func (u User) Equal(u2 User) bool {
 	u.UpdatedAt = u2.UpdatedAt
 
 	return reflect.DeepEqual(u, u2)
+}
+
+func (u UserCreate) CalculateBaseBalance() int64 {
+	if u.Type == Customer {
+		return 100_000 // 1000USD for Customers
+	}
+
+	return 10_000 // 100USD for Merchants
 }

@@ -21,12 +21,16 @@ func (uc *UserUsecase) Create(ctx context.Context, user_type domain.UserType, na
 	}
 
 	publicID, _ := NewPublicID(module_prefix)
-
-	return uc.repository.Save(ctx, &domain.UserCreate{
+	user := &domain.UserCreate{
 		PublicID: publicID,
 		Type:     user_type,
 		Name:     name,
 		Email:    email,
 		Password: password,
-	})
+	}
+
+	balance := user.CalculateBaseBalance()
+	user.Balance = balance
+
+	return uc.repository.Save(ctx, user)
 }

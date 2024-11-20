@@ -16,9 +16,11 @@ func TestGetByEmail(t *testing.T) {
 	t.Run("it should get a user by its email", func(t *testing.T) {
 		want := &domain.User{
 			ID:        1,
+			Type:      domain.Customer,
 			PublicID:  "us_omjnu4m8lsir",
 			Name:      "testuser",
 			Email:     "testuser@testmail.com",
+			Balance:   100_000,
 			CreatedAt: time.Now().UTC(),
 			UpdatedAt: time.Now().UTC(),
 		}
@@ -34,6 +36,8 @@ func TestGetByEmail(t *testing.T) {
 					PublicID:  want.PublicID,
 					Name:      want.Name,
 					Email:     email,
+					Type:      domain.Customer,
+					Balance:   100_000,
 					CreatedAt: time.Now().UTC(),
 					UpdatedAt: time.Now().UTC(),
 				}, nil

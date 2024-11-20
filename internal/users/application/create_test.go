@@ -14,15 +14,29 @@ import (
 
 func TestCreateUser(t *testing.T) {
 	t.Run("it should create a user", func(t *testing.T) {
-		want := &domain.User{
-			ID:        1,
-			Type:      domain.Customer,
-			PublicID:  "us_omjnu4m8lsir",
-			Name:      "testuser",
-			Email:     "testuser@testmail.com",
-			Password:  "hashedpassword",
-			CreatedAt: time.Now().UTC(),
-			UpdatedAt: time.Now().UTC(),
+		table := []*domain.User{
+			{
+				ID:        1,
+				Type:      domain.Customer,
+				PublicID:  "us_omjnu4m8lsir",
+				Name:      "testuser",
+				Email:     "testuser@testmail.com",
+				Password:  "hashedpassword",
+				Balance:   100000, // 1000.00 USD
+				CreatedAt: time.Now().UTC(),
+				UpdatedAt: time.Now().UTC(),
+			},
+			{
+				ID:        1,
+				Type:      domain.Merchant,
+				PublicID:  "us_omjnu4m8lsir",
+				Name:      "testuser",
+				Email:     "testuser@testmail.com",
+				Password:  "hashedpassword",
+				Balance:   10000, // 1000.00 USD
+				CreatedAt: time.Now().UTC(),
+				UpdatedAt: time.Now().UTC(),
+			},
 		}
 
 		NewPublicID = func(prefix string) (string, error) {
@@ -37,6 +51,7 @@ func TestCreateUser(t *testing.T) {
 					Email:     user.Email,
 					Password:  user.Password,
 					Type:      user.Type,
+					Balance:   user.Balance,
 					CreatedAt: time.Now().UTC(),
 					UpdatedAt: time.Now().UTC(),
 				}, nil
@@ -49,18 +64,22 @@ func TestCreateUser(t *testing.T) {
 		uc := NewUserUsecase(repository)
 		ctx := context.Background()
 
-		got, err := uc.Create(ctx, want.Type, want.Name, want.Email, want.Password)
-		if err != nil {
-			t.Errorf("Expected no error, got: %v", err)
-		}
+		for _, want := range table {
+			t.Run(string(want.Type), func(t *testing.T) {
+				got, err := uc.Create(ctx, want.Type, want.Name, want.Email, want.Password)
+				if err != nil {
+					t.Errorf("Expected no error, got: %v", err)
+				}
 
-		rgx := regexp.MustCompile(`us_[a-zA-Z0-9]{5}`)
-		if !rgx.MatchString(got.PublicID) {
-			t.Errorf("Expected PublicID to match the regex %s, got: %s", rgx.String(), got.PublicID)
-		}
+				rgx := regexp.MustCompile(`us_[a-zA-Z0-9]{5}`)
+				if !rgx.MatchString(got.PublicID) {
+					t.Errorf("Expected PublicID to match the regex %s, got: %s", rgx.String(), got.PublicID)
+				}
 
-		if !got.Equal(*want) {
-			t.Errorf("Mismatch creating user. (-want,+got):\n%s", cmp.Diff(want, got))
+				if !got.Equal(*want) {
+					t.Errorf("Mismatch creating user. (-want,+got):\n%s", cmp.Diff(want, got))
+				}
+			})
 		}
 	})
 
