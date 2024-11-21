@@ -1,5 +1,8 @@
 FROM golang:1.23-alpine AS build
 
+LABEL org.opencontainers.image.source=https://github.com/yavurb/mobility-payments
+LABEL org.opencontainers.image.licenses=MIT
+
 ENV GOOS=linux
 
 WORKDIR /app
