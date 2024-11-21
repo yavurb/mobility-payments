@@ -260,7 +260,6 @@ paths:
                   type: string
               examples:
                 - merchant: us_hon4j21
-                  currency: USD
                   amount: 1078
                   method: credit_card
                   description: Fish and fries

@@ -21,7 +21,6 @@ create table transactions (
   sender_id bigint not null references users(id) on delete cascade,
   receiver_id bigint not null references users(id) on delete cascade,
   status transaction_status not null,
-  currency varchar(3) not null,
   amount bigint not null,
   method transaction_payment_method not null,
   description varchar(255) not null default '',
