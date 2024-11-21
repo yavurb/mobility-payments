@@ -341,7 +341,6 @@ components:
           sender_id: us_uiosnh32819k
           receiver_id: us_iosueoq3712
           status: requires_confirmation
-          currency: USD
           amount: 1078
           method: credit_card
           description: Fish and fries
