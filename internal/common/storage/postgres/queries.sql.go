@@ -11,6 +11,49 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const createTransaction = `-- name: CreateTransaction :one
+insert into transactions (
+	public_id,
+	status,
+	method,
+	description,
+	receiver_id,
+	sender_id,
+	amount
+) values ( $1, $2, $3, $4, $5, $6, $7 ) returning id, created_at, updated_at
+`
+
+type CreateTransactionParams struct {
+	PublicID    string
+	Status      TransactionStatus
+	Method      TransactionPaymentMethod
+	Description string
+	ReceiverID  int64
+	SenderID    int64
+	Amount      int64
+}
+
+type CreateTransactionRow struct {
+	ID        int64
+	CreatedAt pgtype.Timestamp
+	UpdatedAt pgtype.Timestamp
+}
+
+func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionParams) (CreateTransactionRow, error) {
+	row := q.db.QueryRow(ctx, createTransaction,
+		arg.PublicID,
+		arg.Status,
+		arg.Method,
+		arg.Description,
+		arg.ReceiverID,
+		arg.SenderID,
+		arg.Amount,
+	)
+	var i CreateTransactionRow
+	err := row.Scan(&i.ID, &i.CreatedAt, &i.UpdatedAt)
+	return i, err
+}
+
 const getByEmail = `-- name: GetByEmail :one
 select id, public_id, type, user_name, email, balance, password, created_at, updated_at from users where email = $1
 `
@@ -77,6 +120,209 @@ func (q *Queries) GetByPublicID(ctx context.Context, publicID string) (GetByPubl
 	return i, err
 }
 
+const getReceiverTransactions = `-- name: GetReceiverTransactions :many
+select
+    t.id,
+    t.public_id,
+    t.status,
+    t.method,
+    t.description,
+    t.receiver_id,
+    t.sender_id,
+    t.amount,
+    t.created_at,
+    t.updated_at,
+    u.public_id as receiver_public_id,
+    ua.public_id as sender_public_id
+from
+    transactions t
+inner join
+    users u on t.receiver_id = u.id
+inner join
+    users ua on t.sender_id = ua.id
+where
+    u.public_id = $1
+`
+
+type GetReceiverTransactionsRow struct {
+	ID               int64
+	PublicID         string
+	Status           TransactionStatus
+	Method           TransactionPaymentMethod
+	Description      string
+	ReceiverID       int64
+	SenderID         int64
+	Amount           int64
+	CreatedAt        pgtype.Timestamp
+	UpdatedAt        pgtype.Timestamp
+	ReceiverPublicID string
+	SenderPublicID   string
+}
+
+func (q *Queries) GetReceiverTransactions(ctx context.Context, publicID string) ([]GetReceiverTransactionsRow, error) {
+	rows, err := q.db.Query(ctx, getReceiverTransactions, publicID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetReceiverTransactionsRow
+	for rows.Next() {
+		var i GetReceiverTransactionsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.PublicID,
+			&i.Status,
+			&i.Method,
+			&i.Description,
+			&i.ReceiverID,
+			&i.SenderID,
+			&i.Amount,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.ReceiverPublicID,
+			&i.SenderPublicID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getSenderTransactions = `-- name: GetSenderTransactions :many
+select
+    t.id,
+    t.public_id,
+    t.status,
+    t.method,
+    t.description,
+    t.receiver_id,
+    t.sender_id,
+    t.amount,
+    t.created_at,
+    t.updated_at,
+    u.public_id as receiver_public_id,
+    ua.public_id as sender_public_id
+from
+    transactions t
+inner join
+    users u on t.receiver_id = u.id
+inner join
+    users ua on t.sender_id = ua.id
+where
+    u.public_id = $1
+`
+
+type GetSenderTransactionsRow struct {
+	ID               int64
+	PublicID         string
+	Status           TransactionStatus
+	Method           TransactionPaymentMethod
+	Description      string
+	ReceiverID       int64
+	SenderID         int64
+	Amount           int64
+	CreatedAt        pgtype.Timestamp
+	UpdatedAt        pgtype.Timestamp
+	ReceiverPublicID string
+	SenderPublicID   string
+}
+
+func (q *Queries) GetSenderTransactions(ctx context.Context, publicID string) ([]GetSenderTransactionsRow, error) {
+	rows, err := q.db.Query(ctx, getSenderTransactions, publicID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetSenderTransactionsRow
+	for rows.Next() {
+		var i GetSenderTransactionsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.PublicID,
+			&i.Status,
+			&i.Method,
+			&i.Description,
+			&i.ReceiverID,
+			&i.SenderID,
+			&i.Amount,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.ReceiverPublicID,
+			&i.SenderPublicID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getTransaction = `-- name: GetTransaction :one
+select
+    t.id,
+    t.public_id,
+    t.status,
+    t.method,
+    t.description,
+    t.receiver_id,
+    t.sender_id,
+    t.amount,
+    t.created_at,
+    t.updated_at,
+    u.public_id as receiver_public_id,
+    ua.public_id as sender_public_id
+from
+    transactions t
+inner join
+    users u on t.receiver_id = u.id
+inner join
+    users ua on t.sender_id = ua.id
+where
+    t.public_id = $1
+`
+
+type GetTransactionRow struct {
+	ID               int64
+	PublicID         string
+	Status           TransactionStatus
+	Method           TransactionPaymentMethod
+	Description      string
+	ReceiverID       int64
+	SenderID         int64
+	Amount           int64
+	CreatedAt        pgtype.Timestamp
+	UpdatedAt        pgtype.Timestamp
+	ReceiverPublicID string
+	SenderPublicID   string
+}
+
+func (q *Queries) GetTransaction(ctx context.Context, publicID string) (GetTransactionRow, error) {
+	row := q.db.QueryRow(ctx, getTransaction, publicID)
+	var i GetTransactionRow
+	err := row.Scan(
+		&i.ID,
+		&i.PublicID,
+		&i.Status,
+		&i.Method,
+		&i.Description,
+		&i.ReceiverID,
+		&i.SenderID,
+		&i.Amount,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.ReceiverPublicID,
+		&i.SenderPublicID,
+	)
+	return i, err
+}
+
 const save = `-- name: Save :one
 insert into users (public_id, type, user_name, email, password, balance) values ($1, $2, $3, $4, $5, $6) returning id, created_at, updated_at
 `
@@ -124,4 +370,60 @@ func (q *Queries) UpdateBalance(ctx context.Context, arg UpdateBalanceParams) (i
 	var balance int64
 	err := row.Scan(&balance)
 	return balance, err
+}
+
+const updateTransaction = `-- name: UpdateTransaction :one
+update transactions
+  set status = $1
+  where public_id = $2
+returning
+  id,
+  status,
+	public_id,
+	status,
+	method,
+	description,
+	receiver_id,
+	sender_id,
+	amount,
+  created_at,
+  updated_at
+`
+
+type UpdateTransactionParams struct {
+	Status   TransactionStatus
+	PublicID string
+}
+
+type UpdateTransactionRow struct {
+	ID          int64
+	Status      TransactionStatus
+	PublicID    string
+	Status_2    TransactionStatus
+	Method      TransactionPaymentMethod
+	Description string
+	ReceiverID  int64
+	SenderID    int64
+	Amount      int64
+	CreatedAt   pgtype.Timestamp
+	UpdatedAt   pgtype.Timestamp
+}
+
+func (q *Queries) UpdateTransaction(ctx context.Context, arg UpdateTransactionParams) (UpdateTransactionRow, error) {
+	row := q.db.QueryRow(ctx, updateTransaction, arg.Status, arg.PublicID)
+	var i UpdateTransactionRow
+	err := row.Scan(
+		&i.ID,
+		&i.Status,
+		&i.PublicID,
+		&i.Status_2,
+		&i.Method,
+		&i.Description,
+		&i.ReceiverID,
+		&i.SenderID,
+		&i.Amount,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }

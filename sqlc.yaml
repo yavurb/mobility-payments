@@ -3,6 +3,7 @@ sql:
   - engine: "postgresql"
     queries:
       - "internal/users/infrastructure/adapters/repository/queries.sql"
+      - "internal/payments/infrastructure/adapters/repository/queries.sql"
     schema: "migrations/"
     gen:
       go:

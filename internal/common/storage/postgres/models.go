@@ -145,7 +145,6 @@ type Transaction struct {
 	SenderID    int64
 	ReceiverID  int64
 	Status      TransactionStatus
-	Currency    string
 	Amount      int64
 	Method      TransactionPaymentMethod
 	Description string
