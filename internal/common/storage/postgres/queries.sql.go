@@ -109,3 +109,19 @@ func (q *Queries) Save(ctx context.Context, arg SaveParams) (SaveRow, error) {
 	err := row.Scan(&i.ID, &i.CreatedAt, &i.UpdatedAt)
 	return i, err
 }
+
+const updateBalance = `-- name: UpdateBalance :one
+update users set balance = $1 where public_id = $2 returning balance
+`
+
+type UpdateBalanceParams struct {
+	Balance  int64
+	PublicID string
+}
+
+func (q *Queries) UpdateBalance(ctx context.Context, arg UpdateBalanceParams) (int64, error) {
+	row := q.db.QueryRow(ctx, updateBalance, arg.Balance, arg.PublicID)
+	var balance int64
+	err := row.Scan(&balance)
+	return balance, err
+}

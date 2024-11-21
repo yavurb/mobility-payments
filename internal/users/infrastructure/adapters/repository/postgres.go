@@ -99,3 +99,15 @@ func (r *UserRepository) GetByPublicID(ctx context.Context, id string) (*domain.
 		UpdatedAt: row.UpdatedAt.Time,
 	}, nil
 }
+
+func (r *UserRepository) UpdateBalance(ctx context.Context, id string, amount int64) (int64, error) {
+	row, err := r.db.UpdateBalance(ctx, postgres.UpdateBalanceParams{
+		PublicID: id,
+		Balance:  amount,
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	return row, nil
+}

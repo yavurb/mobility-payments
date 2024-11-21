@@ -6,3 +6,6 @@ select id, public_id, type, user_name, email, balance, password, created_at, upd
 
 -- name: GetByEmail :one
 select id, public_id, type, user_name, email, balance, password, created_at, updated_at from users where email = $1;
+
+-- name: UpdateBalance :one
+update users set balance = $1 where public_id = $2 returning balance;

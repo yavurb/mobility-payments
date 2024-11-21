@@ -50,6 +50,28 @@ func (u User) Equal(u2 User) bool {
 	return reflect.DeepEqual(u, u2)
 }
 
+func (u *User) CanDebit(amount int64) error {
+	if u.Balance < amount {
+		return ErrInsufficientBalance
+	}
+
+	return nil
+}
+
+func (u *User) Debit(amount int64) error {
+	if err := u.CanDebit(amount); err != nil {
+		return err
+	}
+
+	u.Balance -= amount
+
+	return nil
+}
+
+func (u *User) Credit(amount int64) {
+	u.Balance += amount
+}
+
 func (u UserCreate) CalculateBaseBalance() int64 {
 	if u.Type == Customer {
 		return 100_000 // 1000USD for Customers
