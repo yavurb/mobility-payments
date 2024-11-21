@@ -71,16 +71,17 @@ func (app *App) NewHttpContext() *echo.Echo {
 
 	userRepository := userRepositoryAdapter.NewUserRepository(app.connpool)
 	userUsecase := userApplication.NewUserUsecase(userRepository)
+	tokenManager := authAdapters.NewAuthTokenManager(app.config.HttpAuth.JWTSecret)
 	authUsecase := authApplication.NewAuthUsecase(
 		userUsecase,
 		authAdapters.NewAuthPasswordHasher(),
-		authAdapters.NewAuthTokenManager(app.config.HttpAuth.JWTSecret),
+		tokenManager,
 	)
 	authHTTPUI.NewAuthRouter(e, authUsecase)
 
 	paymentRepository := paymentRepositoryAdapter.NewPaymentsRepository(app.connpool)
 	paymentUsecase := paymentApplication.NewPaymentsUsecase(paymentRepository, userUsecase)
-	paymentHTTPUI.NewPaymentsRouter(e, paymentUsecase)
+	paymentHTTPUI.NewPaymentsRouter(e, paymentUsecase, tokenManager, app.config.HttpAuth.HeaderKey)
 
 	return e
 }

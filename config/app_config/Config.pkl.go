@@ -11,8 +11,6 @@ import (
 
 // Configuration for the application.
 type Config struct {
-	AppURL string `pkl:"appURL"`
-
 	Host string `pkl:"host"`
 
 	Port uint16 `pkl:"port"`

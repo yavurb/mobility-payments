@@ -4,7 +4,10 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	authDomain "github.com/yavurb/mobility-payments/internal/auth/domain"
+	"github.com/yavurb/mobility-payments/internal/common/middlewares"
 	"github.com/yavurb/mobility-payments/internal/payments/domain"
+	usersDomain "github.com/yavurb/mobility-payments/internal/users/domain"
 )
 
 type authRouter struct {
@@ -12,17 +15,17 @@ type authRouter struct {
 	paymentsUsecase domain.Usecase
 }
 
-func NewPaymentsRouter(e *echo.Echo, paymentsUsecase domain.Usecase) {
-	routerGroup := e.Group("/payments")
+func NewPaymentsRouter(e *echo.Echo, paymentsUsecase domain.Usecase, tokenManager authDomain.TokenManager, headerKey string) {
+	routerGroup := e.Group("/payments", middlewares.Authenticate(tokenManager, headerKey))
 	routerCtx := authRouter{
 		echo:            e,
 		paymentsUsecase: paymentsUsecase,
 	}
 
-	routerGroup.GET("/", routerCtx.getTransactions)
-	routerGroup.GET("/:id", routerCtx.getTransaction)
-	routerGroup.POST("/:id/verify", routerCtx.verify)
-	routerGroup.POST("/pay", routerCtx.pay)
+	routerGroup.GET("", routerCtx.getTransactions, middlewares.Authorize([]usersDomain.UserType{usersDomain.Customer, usersDomain.Merchant}))
+	routerGroup.GET("/:id", routerCtx.getTransaction, middlewares.Authorize([]usersDomain.UserType{usersDomain.Customer, usersDomain.Merchant}))
+	routerGroup.PATCH("/:id/verify", routerCtx.verify, middlewares.Authorize([]usersDomain.UserType{usersDomain.Merchant}))
+	routerGroup.POST("/pay", routerCtx.pay, middlewares.Authorize([]usersDomain.UserType{usersDomain.Customer}))
 }
 
 func (r *authRouter) pay(c echo.Context) error {
@@ -41,7 +44,9 @@ func (r *authRouter) pay(c echo.Context) error {
 		}.ErrUnprocessableEntity()
 	}
 
-	transaction, err := r.paymentsUsecase.Pay(c.Request().Context(), "", data.Merchant, data.Description, data.Method, data.Amount)
+	payload, _ := c.Get("user").(*authDomain.TokenPayload)
+
+	transaction, err := r.paymentsUsecase.Pay(c.Request().Context(), payload.ID, data.Merchant, data.Description, data.Method, data.Amount)
 	if err != nil {
 		return handleErr(err)
 	}
@@ -65,7 +70,9 @@ func (r *authRouter) getTransaction(c echo.Context) error {
 		}.ErrUnprocessableEntity()
 	}
 
-	transaction, err := r.paymentsUsecase.GetTransaction(c.Request().Context(), data.ID, "")
+	payload, _ := c.Get("user").(*authDomain.TokenPayload)
+
+	transaction, err := r.paymentsUsecase.GetTransaction(c.Request().Context(), data.ID, payload.ID)
 	if err != nil {
 		return handleErr(err)
 	}
@@ -83,7 +90,9 @@ func (r *authRouter) getTransaction(c echo.Context) error {
 }
 
 func (r *authRouter) getTransactions(c echo.Context) error {
-	transactions, err := r.paymentsUsecase.GetTransactions(c.Request().Context(), "")
+	payload, _ := c.Get("user").(*authDomain.TokenPayload)
+
+	transactions, err := r.paymentsUsecase.GetTransactions(c.Request().Context(), payload.ID)
 	if err != nil {
 		return handleErr(err)
 	}
@@ -126,7 +135,9 @@ func (r *authRouter) verify(c echo.Context) error {
 		status = domain.Succeeded
 	}
 
-	transactions, err := r.paymentsUsecase.Verify(c.Request().Context(), data.ID, status, "")
+	payload, _ := c.Get("user").(*authDomain.TokenPayload)
+
+	transactions, err := r.paymentsUsecase.Verify(c.Request().Context(), data.ID, status, payload.ID)
 	if err != nil {
 		return handleErr(err)
 	}

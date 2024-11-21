@@ -76,7 +76,7 @@ inner join
 inner join
     users ua on t.sender_id = ua.id
 where
-    u.public_id = $1;
+    ua.public_id = $1;
 
 -- name: UpdateTransaction :one
 update transactions

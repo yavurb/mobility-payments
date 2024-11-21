@@ -9,6 +9,7 @@ cors = new Cors {
 }
 httpAuth = new HttpAuth {
   JWTSecret = "somesecret"
+  HeaderKey = "MobilityPayments-Api-Key"
 }
 database = new DatabaseConfig {
   URI = read?("env:DATABASE_URI") ?? "postgres://postgres:postgres@localhost:5432/mobility-payments"

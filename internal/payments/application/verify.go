@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/yavurb/mobility-payments/internal/payments/domain"
 )
@@ -9,12 +10,14 @@ import (
 func (uc *paymentsUsecase) Verify(ctx context.Context, transactionID string, status domain.TransactionStatus, userID string) (*domain.Transaction, error) {
 	receiver, err := uc.userUsecase.GetByPublicID(ctx, userID)
 	if err != nil {
+		fmt.Println("Error getting recevier at verify: ", err)
 		// TODO: Handle not found errors
 		return nil, err
 	}
 
 	transaction, err := uc.paymentsRepository.GetTransaction(ctx, transactionID)
 	if err != nil {
+		fmt.Println("Error getting transaction at verify: ", err)
 		return nil, err
 	}
 
@@ -47,6 +50,7 @@ func (uc *paymentsUsecase) Verify(ctx context.Context, transactionID string, sta
 		Status: status,
 	})
 	if err != nil {
+		fmt.Println("Error updating transaction at verify: ", err)
 		return nil, err
 	}
 

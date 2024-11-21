@@ -12,6 +12,7 @@ class Cors {
 
 class HttpAuth {
   JWTSecret: String
+  HeaderKey: String
 }
 
 class DatabaseConfig {

@@ -41,7 +41,7 @@ func (tm *authTokenManager) Verify(tokenString string) (*domain.TokenPayload, er
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		return tm.JWTSecret, nil
+		return []byte(tm.JWTSecret), nil
 	})
 	if err != nil {
 		fmt.Printf("Error parsing token: %v\n", err)
@@ -57,7 +57,7 @@ func (tm *authTokenManager) Verify(tokenString string) (*domain.TokenPayload, er
 			return nil, err
 		}
 
-		user_type := claims["type"].(userDomain.UserType)
+		user_type := userDomain.UserType(claims["type"].(string))
 
 		return &domain.TokenPayload{
 			ID:   id,

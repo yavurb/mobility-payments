@@ -90,6 +90,7 @@ func (r *paymentsRepository) GetTransaction(ctx context.Context, id string) (*do
 func (r *paymentsRepository) GetSenderTransactions(ctx context.Context, id string) ([]*domain.Transaction, error) {
 	rows, err := r.db.GetSenderTransactions(ctx, id)
 	if err != nil {
+		log.Printf("Error getting Sender Transactions. Got: %v", err)
 		return []*domain.Transaction{}, err
 	}
 
@@ -143,7 +144,8 @@ func (r *paymentsRepository) GetReceiverTransactions(ctx context.Context, id str
 
 func (r *paymentsRepository) UpdateTransaction(ctx context.Context, transactionID string, transaction domain.TransactionUpdate) (*domain.Transaction, error) {
 	row, err := r.db.UpdateTransaction(ctx, postgres.UpdateTransactionParams{
-		Status: postgres.TransactionStatus(transaction.Status),
+		Status:   postgres.TransactionStatus(transaction.Status),
+		PublicID: transactionID,
 	})
 	if err != nil {
 		return nil, err
