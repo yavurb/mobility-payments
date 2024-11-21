@@ -1,0 +1,439 @@
+openapi: 3.1.0
+info:
+  title: Mobility Payments Documentation
+  version: 0.1.0
+  description: |
+    Mobility Payments is one of Mobility's branches. This service is in charge of processing and handling payment events.
+servers:
+  - url: http://localhost:8910/v1
+    description: Development server
+  - url: http://mobility-payments.yurb.dev/v1
+    description: Production server
+tags:
+  - name: auth
+  - name: payments
+  - name: system
+paths:
+  /health:
+    get:
+      deprecated: false
+      security: []
+      tags:
+        - system
+      description: Check if the service is up and running
+      operationId: healthCheck
+      responses:
+        200:
+          description: A system message indicating that the system is up and running
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: healthy!
+
+  /auth/signup:
+    post:
+      deprecated: false
+      security: []
+      tags:
+        - auth
+      description: Craate an account based on the user type
+      operationId: signup
+      requestBody:
+        description: Payload for creating a user
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                account_type:
+                  type: string
+                  enum:
+                    - merchant
+                    - customer
+                name:
+                  type: string
+                email:
+                  format: email
+                  type: string
+                password:
+                  type: string
+                  format: password
+              examples:
+                - name: Roy
+                  email: roy@testmail.com
+                  password: MySecur3P44$w*rd
+                  account_type: merchant
+      responses:
+        201:
+          $ref: "#/components/responses/AuthPayload"
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        422:
+          $ref: "#/components/responses/UnprocessableEntity"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /auth/signin:
+    post:
+      deprecated: false
+      security: []
+      tags:
+        - auth
+      description: Signin with a user credentials
+      operationId: signin
+      requestBody:
+        description: Payload for logging in
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+              examples:
+                - email: roy@testmail.com
+                  password: MySecur3P44$w*rd
+      responses:
+        200:
+          $ref: "#/components/responses/AuthPayload"
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        422:
+          $ref: "#/components/responses/UnprocessableEntity"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /payments:
+    get:
+      deprecated: false
+      tags:
+        - payments
+      description: List all the transactions made (customers) or received (merchants)
+      operationId: getTransactions
+      responses:
+        200:
+          description: A list of transactions, either received (merchants) or made (customers)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Transaction"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+
+  /payments/{id}:
+    get:
+      deprecated: false
+      tags:
+        - payments
+      description: List a transaction based on the transaction ID
+      operationId: getTransaction
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the transaction to request
+          required: true
+          deprecated: false
+          schema:
+            type: string
+            examples:
+              - id: tr_uiosnh32819k
+      responses:
+        200:
+          description: A transaction, either received (merchants) or made (customers)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+
+  /payments/{id}/verify:
+    patch:
+      deprecated: false
+      tags:
+        - payments
+      description: Verify the transaction made from a customer
+      operationId: verifyTransaction
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the transaction to request
+          required: true
+          deprecated: false
+          schema:
+            type: string
+            examples:
+              - id: tr_uiosnh32819k
+      requestBody:
+        description: The data to confirm or decline a transaction
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                confirmation:
+                  type: string
+                  enum:
+                    - confirm
+                    - decline
+      responses:
+        200:
+          description: The data of the transaction confirmed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    description: The transaction ID
+                    type: string
+                  status:
+                    description: The final status of the transaction
+                    type: string
+                    enum:
+                      - succeeded
+                      - declined
+                examples:
+                  - id: tr_uiosnh32819k
+                    status: succeeded
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        422:
+          $ref: "#/components/responses/UnprocessableEntity"
+
+  /payments/pay:
+    post:
+      deprecated: false
+      tags:
+        - payments
+      description: Pay a merchant as a customer
+      operationId: makeTransaction
+      requestBody:
+        description: The transaction data
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                merchant:
+                  type: string
+                currency:
+                  type: string
+                  enum:
+                    - USD
+                    - EUR
+                amount:
+                  description: Payment amount in cents. e.g. 100 USD represents 1.0 USD
+                  type: integer
+                  minimum: 100
+                method:
+                  type: string
+                  enum:
+                    - credit_card
+                    - debit_card
+                    - bank_transfer
+                description:
+                  type: string
+              examples:
+                - merchant: us_hon4j21
+                  amount: 1078
+                  method: credit_card
+                  description: Fish and fries
+      responses:
+        200:
+          description: The data of the transaction confirmed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    description: The transaction ID
+                    type: string
+                  status:
+                    description: The current status of the transaction
+                    type: string
+                    enum:
+                      - requires_confirmation
+                examples:
+                  - id: tr_uiosnh32819k
+                    status: succeeded
+        400:
+          $ref: "#/components/responses/BadRequestError"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        403:
+          $ref: "#/components/responses/Forbidden"
+        404:
+          $ref: "#/components/responses/NotFound"
+        422:
+          $ref: "#/components/responses/UnprocessableEntity"
+
+components:
+  securitySchemes:
+    JWTScheme:
+      type: apiKey
+      in: header
+      name: MobilityPayments-Api-Key
+
+  schemas:
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: string
+        receiver_id:
+          type: string
+        sender_id:
+          type: string
+        status:
+          type: string
+          enum:
+            - requires_confirmation
+            - succeeded
+            - declined
+        currency:
+          type: string
+          enum:
+            - USD
+            - EUR
+        amount:
+          description: Payment amount in cents. e.g. 100 USD represents 1.0 USD
+          type: integer
+          minimum: 100
+        method:
+          type: string
+          enum:
+            - credit_card
+            - debit_card
+            - bank_transfer
+        description:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      examples:
+        - id: tr_uiosnh32819k
+          sender_id: us_uiosnh32819k
+          receiver_id: us_iosueoq3712
+          status: requires_confirmation
+          amount: 1078
+          method: credit_card
+          description: Fish and fries
+          created_at: "2024-11-19T11:58:00"
+
+  responses:
+    AuthPayload:
+      description: The user credentials
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                description: The public id for the created user
+                type: string
+              token:
+                type: string
+            examples:
+              - id: us_hon4j21
+                token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+
+    NotFound:
+      description: Returned when the resource requested is not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+            examples:
+              - message: Transaction does not exists
+
+    BadRequestError:
+      description: Returned when the request is malformed/don't comply with the contract
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+            examples:
+              - message: Missing parameter x
+
+    Unauthorized:
+      description: Returned when the request es made without credentials
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+            examples:
+              - message: User must be authenticated
+
+    Forbidden:
+      description: Returned when the users does not have the necessary permissions to execute the request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+            examples:
+              - message: User does not have the necessary permissions to request the resource
+
+    UnprocessableEntity:
+      description: Returned when the request cannot be fullfiled due to business/validation errors
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+            examples:
+              - message: Email already registered
+
+    InternalServerError:
+      description: Returned when an unexpected error occurs
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+            examples:
+              - message: Error creating resource
+
+security:
+  - JWTScheme: []
