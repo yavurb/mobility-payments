@@ -18,6 +18,10 @@ import (
 
 	userApplication "github.com/yavurb/mobility-payments/internal/users/application"
 	userRepositoryAdapter "github.com/yavurb/mobility-payments/internal/users/infrastructure/adapters/repository"
+
+	paymentApplication "github.com/yavurb/mobility-payments/internal/payments/application"
+	paymentRepositoryAdapter "github.com/yavurb/mobility-payments/internal/payments/infrastructure/adapters/repository"
+	paymentHTTPUI "github.com/yavurb/mobility-payments/internal/payments/infrastructure/ui/http"
 )
 
 type App struct {
@@ -73,6 +77,10 @@ func (app *App) NewHttpContext() *echo.Echo {
 		authAdapters.NewAuthTokenManager(app.config.HttpAuth.JWTSecret),
 	)
 	authHTTPUI.NewAuthRouter(e, authUsecase)
+
+	paymentRepository := paymentRepositoryAdapter.NewPaymentsRepository(app.connpool)
+	paymentUsecase := paymentApplication.NewPaymentsUsecase(paymentRepository, userUsecase)
+	paymentHTTPUI.NewPaymentsRouter(e, paymentUsecase)
 
 	return e
 }

@@ -12,7 +12,7 @@ type authRouter struct {
 	paymentsUsecase domain.Usecase
 }
 
-func NewAuthRouter(e *echo.Echo, paymentsUsecase domain.Usecase) {
+func NewPaymentsRouter(e *echo.Echo, paymentsUsecase domain.Usecase) {
 	routerGroup := e.Group("/payments")
 	routerCtx := authRouter{
 		echo:            e,
