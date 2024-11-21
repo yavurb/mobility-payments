@@ -1,0 +1,21 @@
+services:
+  app:
+    build: .
+    image: mobility-payments
+    depends_on:
+      - postgres
+    ports:
+      - 8910:8910
+    environment:
+      DATABASE_URI: postgres://postgres:postgres@postgres:5432/mobility-payments
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: mobility-payments
+    ports:
+      - 5432:5432
+    volumes:
+      - ./.db:/var/lib/postgresql/data

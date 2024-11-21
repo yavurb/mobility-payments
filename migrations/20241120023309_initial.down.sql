@@ -1,0 +1,5 @@
+DROP TABLE IF EXISTS users CASCADE;
+DROP TYPE IF EXISTS user_type CASCADE;
+DROP TABLE IF EXISTS transactions CASCADE;
+DROP TYPE IF EXISTS transaction_status CASCADE;
+DROP TYPE IF EXISTS transaction_payment_method CASCADE;

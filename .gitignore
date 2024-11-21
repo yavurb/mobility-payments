@@ -1,0 +1,18 @@
+.version
+
+# Chore
+tmp
+
+# MacOS Files
+.DS_Store
+
+# Database related
+.db
+
+# Binary files
+bin/
+
+# Test coverage
+coverage
+coverage.*
+.coverage
